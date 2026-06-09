@@ -1,15 +1,160 @@
-# Elysia with Bun runtime
+# OF Image Compressor
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
-```
+API HTTP en **Bun** + **TypeScript** para compresión y optimización de imágenes. Implementa **Clean Architecture**, **SOLID** y **Ports & Adapters**.
 
-## Development
-To start the development server run:
+## Requisitos
+
+- [Bun](https://bun.sh) 1.x
+
+## Inicio rápido
+
 ```bash
+cp .env.example .env
+bun install
 bun run dev
 ```
 
-Open http://localhost:3000/ with your browser to see the result.
+El servidor arranca en `http://localhost:3001` con cluster automático por CPU.
+
+## Endpoint principal
+
+### `POST /api/v1/images/compress`
+
+**Content-Type:** `multipart/form-data`
+
+| Campo          | Tipo    | Requerido | Descripción                          |
+|----------------|---------|-----------|--------------------------------------|
+| `file`         | binary  | Sí        | Imagen a comprimir                   |
+| `quality`      | integer | No        | Calidad 1–100 (default: 80)          |
+| `outputFormat` | string  | No        | `jpeg`, `png`, `webp`, `avif`        |
+| `maxWidth`     | integer | No        | Ancho máximo en píxeles              |
+| `maxHeight`    | integer | No        | Alto máximo en píxeles               |
+
+**Respuesta:** archivo optimizado en binario con headers:
+
+- `Content-Type`
+- `Content-Disposition`
+- `X-Original-Size`
+- `X-Compressed-Size`
+- `X-Compression-Ratio`
+- `X-Output-Format`
+
+### Ejemplo con curl
+
+```bash
+curl -X POST http://localhost:3001/api/v1/images/compress \
+  -F "file=@./photo.jpg" \
+  -F "quality=75" \
+  -F "outputFormat=webp" \
+  -o optimized.webp \
+  -D headers.txt
+```
+
+## Documentación OpenAPI
+
+- UI: [http://localhost:3001/docs](http://localhost:3001/docs)
+- Spec JSON: [http://localhost:3001/docs/json](http://localhost:3001/docs/json)
+
+## Variables de entorno
+
+| Variable                | Default | Descripción                        |
+|-------------------------|---------|------------------------------------|
+| `PORT`                  | 3001    | Puerto HTTP                        |
+| `MAX_UPLOAD_SIZE_MB`    | 20      | Tamaño máximo de upload            |
+| `MAX_IMAGE_WIDTH`       | 10000   | Ancho máximo de imagen             |
+| `MAX_IMAGE_HEIGHT`      | 10000   | Alto máximo de imagen              |
+| `DEFAULT_QUALITY`       | 80      | Calidad por defecto                |
+| `DEFAULT_OUTPUT_FORMAT` | webp    | Formato de salida por defecto      |
+
+## Scripts
+
+```bash
+bun run dev        # Desarrollo con hot reload
+bun run start      # Producción local
+bun run test       # Tests unitarios (Vitest)
+bun run lint       # Biome check
+bun run lint:fix   # Biome check + autofix
+bun run format     # Biome format
+```
+
+## Docker
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Healthcheck: `GET /health`
+
+## Formatos soportados
+
+**Entrada:** JPEG, PNG, WebP, AVIF, GIF, SVG
+
+**Salida:** JPEG, PNG, WebP, AVIF
+
+> **GIF:** Sharp puede procesar GIFs animados; la compresión puede aplanar frames según opciones.
+>
+> **SVG:** Sharp rasteriza SVG a bitmap. Se aplican límites estrictos de tamaño por seguridad.
+
+## Arquitectura
+
+```
+src/
+  main.ts                 # Composition root (DI)
+  index.ts                # Cluster bootstrap
+  modules/
+    image-compression/
+      domain/             # Reglas de negocio puras
+      application/        # Casos de uso y puertos
+      infrastructure/     # Sharp (adapters)
+      presentation/       # HTTP, Zod, OpenAPI
+      composition/        # Wiring del módulo
+  shared/                 # Config, errores, logger
+```
+
+### Capas
+
+| Capa             | Responsabilidad                                              |
+|------------------|--------------------------------------------------------------|
+| **Domain**       | Entidades, value objects, validaciones, errores de negocio   |
+| **Application**  | `CompressImageUseCase`, puertos (`ImageCompressorPort`, etc.) |
+| **Infrastructure** | Implementaciones Sharp encapsuladas                        |
+| **Presentation** | Controller, routes, schemas Zod, documentación OpenAPI       |
+| **Shared**       | Configuración, manejo global de errores, logging             |
+
+### Escalabilidad futura
+
+- Nuevos módulos (`resize`, `crop`, `watermark`) siguen el patrón `createXModule()`
+- `ImageMetadataReaderPort` reutilizable entre operaciones
+- Composition root centralizado en `main.ts`
+
+## Errores
+
+Respuesta JSON estándar:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_IMAGE_TYPE",
+    "message": "Unsupported image format"
+  }
+}
+```
+
+Códigos: `INVALID_IMAGE_TYPE`, `IMAGE_TOO_LARGE`, `COMPRESSION_FAILED`, `INVALID_COMPRESSION_OPTIONS`, `INVALID_REQUEST`, `INTERNAL_ERROR`
+
+## Tests
+
+```bash
+bun run test
+```
+
+Casos cubiertos en `CompressImageUseCase`:
+
+- Imagen válida
+- Imagen inválida (buffer vacío)
+- Formato no soportado
+- Calidad inválida
+- Compresión exitosa con métricas
+- Error del compresor

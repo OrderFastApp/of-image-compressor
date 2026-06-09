@@ -1,0 +1,27 @@
+services:
+  image-compressor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: of-image-compressor:latest
+    container_name: of-image-compressor
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-20}
+      MAX_IMAGE_WIDTH: ${MAX_IMAGE_WIDTH:-10000}
+      MAX_IMAGE_HEIGHT: ${MAX_IMAGE_HEIGHT:-10000}
+      DEFAULT_QUALITY: ${DEFAULT_QUALITY:-80}
+      DEFAULT_OUTPUT_FORMAT: ${DEFAULT_OUTPUT_FORMAT:-webp}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
