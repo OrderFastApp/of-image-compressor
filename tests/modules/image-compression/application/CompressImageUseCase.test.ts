@@ -9,6 +9,7 @@ import type { EnvConfig } from "@/shared/config/env";
 import { describe, expect, it, vi } from "vitest";
 
 const envConfig: EnvConfig = {
+  HOST: "localhost",
   PORT: 3000,
   MAX_UPLOAD_SIZE_MB: 20,
   MAX_IMAGE_WIDTH: 10000,

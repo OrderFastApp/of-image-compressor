@@ -63,11 +63,15 @@ export function createApp() {
         },
       },
     })
-    .listen(envConfig.PORT);
+    .listen({
+      hostname: envConfig.HOST,
+      port: envConfig.PORT,
+    });
 
   logger.info("Server started", {
-    hostname: app.server?.hostname,
-    port: app.server?.port,
+    hostname: envConfig.HOST,
+    port: envConfig.PORT,
+    url: `http://localhost:${envConfig.PORT}`,
   });
 
   return app;

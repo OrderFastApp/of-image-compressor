@@ -9,6 +9,7 @@ services:
       - "${PORT:-3000}:3000"
     environment:
       NODE_ENV: production
+      HOST: 0.0.0.0
       PORT: 3000
       MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-20}
       MAX_IMAGE_WIDTH: ${MAX_IMAGE_WIDTH:-10000}

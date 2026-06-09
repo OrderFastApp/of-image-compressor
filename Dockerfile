@@ -13,6 +13,7 @@ COPY src ./src
 COPY tsconfig.json ./
 
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
 ENV PORT=3000
 
 USER bun

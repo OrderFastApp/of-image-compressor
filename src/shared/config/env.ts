@@ -2,7 +2,12 @@ import { z } from "zod";
 
 const outputFormatSchema = z.enum(["jpeg", "png", "webp", "avif"]);
 
+function defaultHost(): string {
+  return process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+}
+
 const envSchema = z.object({
+  HOST: z.string().min(1).default(defaultHost),
   PORT: z.coerce.number().int().positive().default(3000),
   MAX_UPLOAD_SIZE_MB: z.coerce.number().positive().default(20),
   MAX_IMAGE_WIDTH: z.coerce.number().int().positive().default(10000),
