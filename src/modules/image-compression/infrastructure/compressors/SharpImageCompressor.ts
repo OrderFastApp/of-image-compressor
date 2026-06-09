@@ -1,3 +1,4 @@
+import { logger } from "@/shared/logger/logger";
 import sharp from "sharp";
 import type { ImageCompressorPort } from "../../application/ports/ImageCompressorPort";
 import { CompressionFailedError } from "../../domain/errors/CompressionFailedError";
@@ -6,6 +7,16 @@ import type { OutputFormat } from "../../domain/value-objects/OutputFormat";
 export class SharpImageCompressor implements ImageCompressorPort {
   async compress(request: Parameters<ImageCompressorPort["compress"]>[0]) {
     const { image, options } = request;
+    const startedAt = Date.now();
+
+    logger.debug("SharpImageCompressor started", {
+      mimeType: image.mimeType,
+      inputSizeBytes: image.buffer.byteLength,
+      outputFormat: options.outputFormat,
+      quality: options.quality.value,
+      maxWidth: options.maxWidth,
+      maxHeight: options.maxHeight,
+    });
 
     try {
       let pipeline = sharp(image.buffer, { animated: image.mimeType === "image/gif" });
@@ -45,6 +56,15 @@ export class SharpImageCompressor implements ImageCompressorPort {
           );
       }
 
+      const durationMs = Date.now() - startedAt;
+
+      logger.debug("SharpImageCompressor completed", {
+        outputFormat,
+        inputSizeBytes: image.buffer.byteLength,
+        outputSizeBytes: buffer.byteLength,
+        durationMs,
+      });
+
       return {
         buffer: new Uint8Array(buffer),
         outputFormat: outputFormat as OutputFormat,
@@ -54,6 +74,12 @@ export class SharpImageCompressor implements ImageCompressorPort {
         throw error;
       }
       const message = error instanceof Error ? error.message : "Unknown compression error";
+
+      logger.debug("SharpImageCompressor failed", {
+        error: error instanceof Error ? error : String(error),
+        durationMs: Date.now() - startedAt,
+      });
+
       throw new CompressionFailedError(message);
     }
   }

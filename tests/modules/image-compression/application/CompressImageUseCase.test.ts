@@ -16,6 +16,7 @@ const envConfig: EnvConfig = {
   MAX_IMAGE_HEIGHT: 10000,
   DEFAULT_QUALITY: 80,
   DEFAULT_OUTPUT_FORMAT: "webp",
+  LOG_LEVEL: "debug",
 };
 
 const validPngBuffer = new Uint8Array([

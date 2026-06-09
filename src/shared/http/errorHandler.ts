@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { ZodError } from "zod";
 import { AppError } from "../errors/AppError";
 import { logger } from "../logger/logger";
 import { ERROR_CODES } from "./errorCodes";
@@ -20,19 +21,49 @@ function buildErrorResponse(code: string, message: string): ErrorResponse {
 
 export const errorHandler = new Elysia({ name: "error-handler" }).onError(
   { as: "global" },
-  ({ error, set }) => {
+  ({ error, set, requestId }) => {
+    const requestLogger = typeof requestId === "string" ? logger.child({ requestId }) : logger;
+
     if (error instanceof AppError) {
+      const logContext = {
+        code: error.code,
+        statusCode: error.statusCode,
+        errorMessage: error.message,
+      };
+
+      if (error.statusCode >= 500) {
+        requestLogger.error("Application error", logContext);
+      } else {
+        requestLogger.warn("Application error", logContext);
+      }
+
       set.status = error.statusCode;
       return buildErrorResponse(error.code, error.message);
     }
 
-    if (error instanceof Error && error.name === "ZodError") {
+    if (error instanceof ZodError) {
+      requestLogger.warn("Validation error", {
+        issues: error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+
       set.status = 422;
       return buildErrorResponse(ERROR_CODES.INVALID_REQUEST, error.message);
     }
 
-    logger.error("Unhandled error", {
-      error: error instanceof Error ? error.message : String(error),
+    if (error instanceof Error && error.name === "ZodError") {
+      requestLogger.warn("Validation error", {
+        message: error.message,
+      });
+
+      set.status = 422;
+      return buildErrorResponse(ERROR_CODES.INVALID_REQUEST, error.message);
+    }
+
+    requestLogger.error("Unhandled error", {
+      error: error instanceof Error ? error : String(error),
     });
 
     set.status = 500;

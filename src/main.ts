@@ -8,10 +8,22 @@ import { SharpImageMetadataReader } from "./modules/image-compression/infrastruc
 import { ImageCompressionController } from "./modules/image-compression/presentation/controllers/ImageCompressionController";
 import { loadEnvConfig } from "./shared/config/env";
 import { errorHandler } from "./shared/http/errorHandler";
+import { requestLoggingMiddleware } from "./shared/http/requestLoggingMiddleware";
 import { logger } from "./shared/logger/logger";
 
 export function createApp() {
   const envConfig = loadEnvConfig();
+
+  logger.info("Creating application dependencies", {
+    host: envConfig.HOST,
+    port: envConfig.PORT,
+    maxUploadSizeMb: envConfig.MAX_UPLOAD_SIZE_MB,
+    maxImageWidth: envConfig.MAX_IMAGE_WIDTH,
+    maxImageHeight: envConfig.MAX_IMAGE_HEIGHT,
+    defaultQuality: envConfig.DEFAULT_QUALITY,
+    defaultOutputFormat: envConfig.DEFAULT_OUTPUT_FORMAT,
+    logLevel: envConfig.LOG_LEVEL,
+  });
 
   const metadataReader = new SharpImageMetadataReader();
   const compressor = new SharpImageCompressor();
@@ -26,6 +38,7 @@ export function createApp() {
 
   const app = new Elysia()
     .use(errorHandler)
+    .use(requestLoggingMiddleware)
     .use(
       openapi({
         path: "/docs",
@@ -67,6 +80,10 @@ export function createApp() {
       hostname: envConfig.HOST,
       port: envConfig.PORT,
     });
+
+  logger.info("Application ready", {
+    routes: ["GET /health", "POST /api/v1/images/compress", "GET /docs", "GET /docs/json"],
+  });
 
   logger.info("Server started", {
     hostname: envConfig.HOST,

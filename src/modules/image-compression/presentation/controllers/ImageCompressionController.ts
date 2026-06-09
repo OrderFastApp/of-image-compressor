@@ -1,28 +1,61 @@
 import { InvalidRequestError } from "@/shared/errors/InvalidRequestError";
+import type { Logger } from "@/shared/logger/logger";
 import type { CompressImageUseCase } from "../../application/use-cases/CompressImageUseCase";
 import {
   type CompressImageFormInput,
   compressImageFormSchema,
 } from "../schemas/compressImageSchema";
 
+type CompressRequestContext = {
+  requestId: string;
+  requestLogger: Logger;
+};
+
 export class ImageCompressionController {
   constructor(private readonly compressImageUseCase: CompressImageUseCase) {}
 
-  async compress(request: Request): Promise<Response> {
+  async compress(request: Request, context: CompressRequestContext): Promise<Response> {
+    const { requestLogger, requestId } = context;
+    const startedAt = Date.now();
+
     const formData = await request.formData();
     const parsed = this.parseFormData(formData);
 
-    const arrayBuffer = await parsed.file.arrayBuffer();
-    const fileBuffer = new Uint8Array(arrayBuffer);
-
-    const result = await this.compressImageUseCase.execute({
-      fileBuffer,
-      originalFilename: this.sanitizeFilename(parsed.file.name),
+    requestLogger.debug("Parsing compress form data", {
+      filename: this.sanitizeFilename(parsed.file.name),
       mimeType: parsed.file.type || "application/octet-stream",
+      fileSizeBytes: parsed.file.size,
       quality: parsed.quality,
       outputFormat: parsed.outputFormat,
       maxWidth: parsed.maxWidth,
       maxHeight: parsed.maxHeight,
+    });
+
+    const arrayBuffer = await parsed.file.arrayBuffer();
+    const fileBuffer = new Uint8Array(arrayBuffer);
+
+    const result = await this.compressImageUseCase.execute(
+      {
+        fileBuffer,
+        originalFilename: this.sanitizeFilename(parsed.file.name),
+        mimeType: parsed.file.type || "application/octet-stream",
+        quality: parsed.quality,
+        outputFormat: parsed.outputFormat,
+        maxWidth: parsed.maxWidth,
+        maxHeight: parsed.maxHeight,
+      },
+      { requestId },
+    );
+
+    const durationMs = Date.now() - startedAt;
+
+    requestLogger.info("Compress request completed", {
+      originalSize: result.originalSize,
+      compressedSize: result.compressedSize,
+      compressionRatio: result.compressionRatio,
+      outputFormat: result.outputFormat,
+      filename: result.filename,
+      durationMs,
     });
 
     return new Response(result.fileBuffer, {
