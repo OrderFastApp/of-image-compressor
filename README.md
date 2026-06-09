@@ -14,7 +14,7 @@ bun install
 bun run dev
 ```
 
-El servidor arranca en `http://localhost:3001` con cluster automático por CPU.
+El servidor arranca en `http://localhost:3000` con cluster automático por CPU.
 
 ## Endpoint principal
 
@@ -42,7 +42,7 @@ El servidor arranca en `http://localhost:3001` con cluster automático por CPU.
 ### Ejemplo con curl
 
 ```bash
-curl -X POST http://localhost:3001/api/v1/images/compress \
+curl -X POST http://localhost:3000/api/v1/images/compress \
   -F "file=@./photo.jpg" \
   -F "quality=75" \
   -F "outputFormat=webp" \
@@ -52,14 +52,14 @@ curl -X POST http://localhost:3001/api/v1/images/compress \
 
 ## Documentación OpenAPI
 
-- UI: [http://localhost:3001/docs](http://localhost:3001/docs)
-- Spec JSON: [http://localhost:3001/docs/json](http://localhost:3001/docs/json)
+- UI: [http://localhost:3000/docs](http://localhost:3000/docs)
+- Spec JSON: [http://localhost:3000/docs/json](http://localhost:3000/docs/json)
 
 ## Variables de entorno
 
 | Variable                | Default | Descripción                        |
 |-------------------------|---------|------------------------------------|
-| `PORT`                  | 3001    | Puerto HTTP                        |
+| `PORT`                  | 3000    | Puerto HTTP                        |
 | `MAX_UPLOAD_SIZE_MB`    | 20      | Tamaño máximo de upload            |
 | `MAX_IMAGE_WIDTH`       | 10000   | Ancho máximo de imagen             |
 | `MAX_IMAGE_HEIGHT`      | 10000   | Alto máximo de imagen              |

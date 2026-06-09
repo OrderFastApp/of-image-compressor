@@ -3,7 +3,7 @@ import { z } from "zod";
 const outputFormatSchema = z.enum(["jpeg", "png", "webp", "avif"]);
 
 const envSchema = z.object({
-  PORT: z.coerce.number().int().positive().default(3001),
+  PORT: z.coerce.number().int().positive().default(3000),
   MAX_UPLOAD_SIZE_MB: z.coerce.number().positive().default(20),
   MAX_IMAGE_WIDTH: z.coerce.number().int().positive().default(10000),
   MAX_IMAGE_HEIGHT: z.coerce.number().int().positive().default(10000),
