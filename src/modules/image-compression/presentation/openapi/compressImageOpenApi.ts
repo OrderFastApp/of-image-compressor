@@ -54,6 +54,13 @@ export const compressImageOpenApiDetail = {
               minimum: 1,
               description: "Maximum height in pixels (resize with fit inside)",
             },
+            aspectRatio: {
+              type: "string",
+              pattern: "^\\d+:\\d+$",
+              description:
+                'Target aspect ratio in "W:H" format (e.g. "16:9", "1:1"). Crops the image centered to match the ratio. Optionally combined with maxWidth/maxHeight to constrain output size.',
+              example: "16:9",
+            },
           },
           required: ["file"],
         },

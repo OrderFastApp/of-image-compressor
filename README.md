@@ -29,6 +29,7 @@ El servidor arranca en `http://localhost:3000` con cluster automático por CPU.
 | `outputFormat` | string  | No        | `jpeg`, `png`, `webp`, `avif`        |
 | `maxWidth`     | integer | No        | Ancho máximo en píxeles              |
 | `maxHeight`    | integer | No        | Alto máximo en píxeles               |
+| `aspectRatio`  | string  | No        | Ratio de aspecto en formato `W:H` (ej. `16:9`, `1:1`). Recorta la imagen centrada al ratio indicado. Opcionalmente combinado con `maxWidth`/`maxHeight` |
 
 **Respuesta:** archivo optimizado en binario con headers:
 
@@ -46,6 +47,8 @@ curl -X POST http://localhost:3000/api/v1/images/compress \
   -F "file=@./photo.jpg" \
   -F "quality=75" \
   -F "outputFormat=webp" \
+  -F "aspectRatio=16:9" \
+  -F "maxWidth=1920" \
   -o optimized.webp \
   -D headers.txt
 ```

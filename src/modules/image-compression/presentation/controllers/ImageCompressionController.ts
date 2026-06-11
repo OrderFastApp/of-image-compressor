@@ -29,6 +29,7 @@ export class ImageCompressionController {
       outputFormat: parsed.outputFormat,
       maxWidth: parsed.maxWidth,
       maxHeight: parsed.maxHeight,
+      aspectRatio: parsed.aspectRatio,
     });
 
     const arrayBuffer = await parsed.file.arrayBuffer();
@@ -43,6 +44,7 @@ export class ImageCompressionController {
         outputFormat: parsed.outputFormat,
         maxWidth: parsed.maxWidth,
         maxHeight: parsed.maxHeight,
+        aspectRatio: parsed.aspectRatio,
       },
       { requestId },
     );
@@ -84,6 +86,7 @@ export class ImageCompressionController {
       outputFormat: formData.get("outputFormat") ?? undefined,
       maxWidth: formData.get("maxWidth") ?? undefined,
       maxHeight: formData.get("maxHeight") ?? undefined,
+      aspectRatio: formData.get("aspectRatio") ?? undefined,
     });
 
     if (!result.success) {

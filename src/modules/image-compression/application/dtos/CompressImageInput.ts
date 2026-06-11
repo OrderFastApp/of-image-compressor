@@ -8,4 +8,5 @@ export type CompressImageInput = {
   outputFormat?: OutputFormat;
   maxWidth?: number;
   maxHeight?: number;
+  aspectRatio?: string;
 };

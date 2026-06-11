@@ -31,6 +31,21 @@ export const compressImageFormSchema = z.object({
   outputFormat: z.enum(OUTPUT_FORMATS).optional(),
   maxWidth: optionalPositiveInt,
   maxHeight: optionalPositiveInt,
+  aspectRatio: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (value === undefined || value === "") {
+        return undefined;
+      }
+      return value;
+    })
+    .pipe(
+      z
+        .string()
+        .regex(/^\d+:\d+$/, 'aspectRatio must be in "W:H" format')
+        .optional(),
+    ),
 });
 
 export type CompressImageFormInput = z.infer<typeof compressImageFormSchema>;

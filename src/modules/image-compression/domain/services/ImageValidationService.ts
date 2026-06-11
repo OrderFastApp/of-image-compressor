@@ -62,6 +62,14 @@ export class ImageValidationService {
     if (options.maxHeight !== undefined && options.maxHeight <= 0) {
       throw new InvalidCompressionOptionsError("maxHeight must be a positive integer");
     }
+
+    if (options.aspectRatio === undefined) {
+      return;
+    }
+
+    if (options.aspectRatio.width <= 0 || options.aspectRatio.height <= 0) {
+      throw new InvalidCompressionOptionsError("aspectRatio components must be positive integers");
+    }
   }
 
   validateDimensions(dimensions: Dimensions, limits: ValidationLimits): void {

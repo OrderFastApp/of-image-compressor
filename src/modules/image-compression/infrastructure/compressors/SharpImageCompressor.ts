@@ -16,12 +16,35 @@ export class SharpImageCompressor implements ImageCompressorPort {
       quality: options.quality.value,
       maxWidth: options.maxWidth,
       maxHeight: options.maxHeight,
+      aspectRatio: options.aspectRatio
+        ? `${options.aspectRatio.width}:${options.aspectRatio.height}`
+        : undefined,
     });
 
     try {
       let pipeline = sharp(image.buffer, { animated: image.mimeType === "image/gif" });
 
-      if (options.maxWidth !== undefined || options.maxHeight !== undefined) {
+      if (options.aspectRatio !== undefined) {
+        const metadata = await pipeline.metadata();
+        if (!metadata.width || !metadata.height) {
+          throw new CompressionFailedError("Unable to read image dimensions for aspect ratio crop");
+        }
+
+        const targetDimensions = options.aspectRatio.calculateTargetDimensions({
+          sourceWidth: metadata.width,
+          sourceHeight: metadata.height,
+          maxWidth: options.maxWidth,
+          maxHeight: options.maxHeight,
+        });
+
+        pipeline = pipeline.resize({
+          width: targetDimensions.width,
+          height: targetDimensions.height,
+          fit: "cover",
+          position: "centre",
+          withoutEnlargement: true,
+        });
+      } else if (options.maxWidth !== undefined || options.maxHeight !== undefined) {
         pipeline = pipeline.resize({
           width: options.maxWidth,
           height: options.maxHeight,

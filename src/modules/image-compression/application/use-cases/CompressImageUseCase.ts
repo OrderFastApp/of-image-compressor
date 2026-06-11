@@ -10,6 +10,7 @@ import type {
   ImageValidationService,
   ValidationLimits,
 } from "../../domain/services/ImageValidationService";
+import { AspectRatio } from "../../domain/value-objects/AspectRatio";
 import { Dimensions } from "../../domain/value-objects/Dimensions";
 import { isAllowedMimeType } from "../../domain/value-objects/ImageMimeType";
 import type { OutputFormat } from "../../domain/value-objects/OutputFormat";
@@ -42,6 +43,7 @@ export class CompressImageUseCase {
       outputFormat: input.outputFormat,
       maxWidth: input.maxWidth,
       maxHeight: input.maxHeight,
+      aspectRatio: input.aspectRatio,
     });
 
     if (!isAllowedMimeType(input.mimeType)) {
@@ -73,7 +75,23 @@ export class CompressImageUseCase {
 
     const outputFormat: OutputFormat = input.outputFormat ?? this.envConfig.DEFAULT_OUTPUT_FORMAT;
 
-    const options = new CompressionOptions(quality, outputFormat, input.maxWidth, input.maxHeight);
+    let aspectRatio: AspectRatio | undefined;
+    if (input.aspectRatio !== undefined) {
+      aspectRatio = AspectRatio.tryParse(input.aspectRatio);
+      if (!aspectRatio) {
+        throw new InvalidCompressionOptionsError(
+          'aspectRatio must be in "W:H" format with positive integers',
+        );
+      }
+    }
+
+    const options = new CompressionOptions(
+      quality,
+      outputFormat,
+      input.maxWidth,
+      input.maxHeight,
+      aspectRatio,
+    );
 
     this.validationService.validateCompressionOptions(options);
 
@@ -82,6 +100,7 @@ export class CompressImageUseCase {
       outputFormat,
       maxWidth: input.maxWidth,
       maxHeight: input.maxHeight,
+      aspectRatio: input.aspectRatio,
     });
 
     const metadataStartedAt = Date.now();
