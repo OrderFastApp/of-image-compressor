@@ -16,6 +16,9 @@ services:
       MAX_IMAGE_HEIGHT: ${MAX_IMAGE_HEIGHT:-10000}
       DEFAULT_QUALITY: ${DEFAULT_QUALITY:-80}
       DEFAULT_OUTPUT_FORMAT: ${DEFAULT_OUTPUT_FORMAT:-webp}
+      CORS_ENABLED: ${CORS_ENABLED:-true}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      CORS_CREDENTIALS: ${CORS_CREDENTIALS:-false}
     restart: unless-stopped
     read_only: true
     tmpfs:

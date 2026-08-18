@@ -68,6 +68,9 @@ curl -X POST http://localhost:3000/api/v1/images/compress \
 | `MAX_IMAGE_HEIGHT`      | 10000   | Alto máximo de imagen              |
 | `DEFAULT_QUALITY`       | 80      | Calidad por defecto                |
 | `DEFAULT_OUTPUT_FORMAT` | webp    | Formato de salida por defecto      |
+| `CORS_ENABLED`          | true    | Habilita CORS                      |
+| `CORS_ORIGIN`           | `*`     | Orígenes permitidos (`*` o lista separada por comas) |
+| `CORS_CREDENTIALS`      | false   | Permite cookies/credentials        |
 
 ## Scripts
 

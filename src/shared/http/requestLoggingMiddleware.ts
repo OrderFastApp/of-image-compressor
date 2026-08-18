@@ -71,13 +71,20 @@ export const requestLoggingMiddleware = new Elysia({ name: "request-logging" })
       } as typeof set.headers;
     },
   )
-  .mapResponse({ as: "global" }, ({ response, requestId }): Response | undefined => {
+  .mapResponse({ as: "global" }, ({ response, requestId, set }): Response | undefined => {
     if (!(response instanceof Response)) {
       return;
     }
 
     const headers = new Headers(response.headers);
     headers.set("X-Request-Id", requestId);
+
+    const setHeaders = set.headers ?? {};
+    for (const [key, value] of Object.entries(setHeaders)) {
+      if (typeof value === "string") {
+        headers.set(key, value);
+      }
+    }
 
     return new Response(response.body, {
       status: response.status,

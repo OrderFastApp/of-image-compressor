@@ -7,6 +7,7 @@ import { SharpImageCompressor } from "./modules/image-compression/infrastructure
 import { SharpImageMetadataReader } from "./modules/image-compression/infrastructure/metadata/SharpImageMetadataReader";
 import { ImageCompressionController } from "./modules/image-compression/presentation/controllers/ImageCompressionController";
 import { loadEnvConfig } from "./shared/config/env";
+import { createCorsPlugin } from "./shared/http/cors";
 import { errorHandler } from "./shared/http/errorHandler";
 import { requestLoggingMiddleware } from "./shared/http/requestLoggingMiddleware";
 import { logger } from "./shared/logger/logger";
@@ -23,6 +24,9 @@ export function createApp() {
     defaultQuality: envConfig.DEFAULT_QUALITY,
     defaultOutputFormat: envConfig.DEFAULT_OUTPUT_FORMAT,
     logLevel: envConfig.LOG_LEVEL,
+    corsEnabled: envConfig.CORS_ENABLED,
+    corsOrigin: envConfig.CORS_ORIGIN,
+    corsCredentials: envConfig.CORS_CREDENTIALS,
   });
 
   const metadataReader = new SharpImageMetadataReader();
@@ -37,6 +41,7 @@ export function createApp() {
   const controller = new ImageCompressionController(compressImageUseCase);
 
   const app = new Elysia()
+    .use(createCorsPlugin(envConfig))
     .use(errorHandler)
     .use(requestLoggingMiddleware)
     .use(

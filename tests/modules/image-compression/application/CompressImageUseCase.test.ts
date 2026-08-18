@@ -17,6 +17,9 @@ const envConfig: EnvConfig = {
   DEFAULT_QUALITY: 80,
   DEFAULT_OUTPUT_FORMAT: "webp",
   LOG_LEVEL: "debug",
+  CORS_ENABLED: true,
+  CORS_ORIGIN: "*",
+  CORS_CREDENTIALS: false,
 };
 
 const validPngBuffer = new Uint8Array([

@@ -8,6 +8,24 @@ function defaultHost(): string {
 
 const logLevelSchema = z.enum(["debug", "info", "warn", "error"]);
 
+function booleanFromEnv(defaultValue: boolean) {
+  return z.preprocess((value) => {
+    if (value === undefined || value === "") {
+      return defaultValue;
+    }
+
+    if (typeof value === "boolean") {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      return value.toLowerCase() === "true";
+    }
+
+    return defaultValue;
+  }, z.boolean());
+}
+
 const envSchema = z.object({
   HOST: z.string().min(1).default(defaultHost),
   PORT: z.coerce.number().int().positive().default(3000),
@@ -17,6 +35,9 @@ const envSchema = z.object({
   DEFAULT_QUALITY: z.coerce.number().int().min(1).max(100).default(80),
   DEFAULT_OUTPUT_FORMAT: outputFormatSchema.default("webp"),
   LOG_LEVEL: logLevelSchema.default("debug"),
+  CORS_ENABLED: booleanFromEnv(true),
+  CORS_ORIGIN: z.string().min(1).default("*"),
+  CORS_CREDENTIALS: booleanFromEnv(false),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
