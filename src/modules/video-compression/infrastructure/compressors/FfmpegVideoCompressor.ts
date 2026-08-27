@@ -36,7 +36,7 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
 
     if (exitCode !== 0) {
       throw new VideoCompressionFailedError(
-        `ffmpeg failed${stderr ? `: ${stderr.trim().slice(-500)}` : ""}`,
+        `ffmpeg failed (exit ${exitCode})${stderr ? `: ${this.extractFfmpegError(stderr)}` : ""}`,
       );
     }
 
@@ -103,9 +103,11 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
       return null;
     }
 
-    // Keep aspect ratio; -2 ensures even dimensions for codecs.
+    // No shell quotes: Bun.spawn passes argv literally.
+    // Escape commas inside expressions (`,` separates filters in -vf).
+    // force_divisible_by=2 keeps dimensions even for libx264/libvpx.
     if (maxWidth !== undefined && maxHeight !== undefined) {
-      return `scale='min(${maxWidth},iw)':'min(${maxHeight},ih)':force_original_aspect_ratio=decrease`;
+      return `scale=w=min(iw\\,${maxWidth}):h=min(ih\\,${maxHeight}):force_original_aspect_ratio=decrease:force_divisible_by=2`;
     }
 
     if (maxWidth !== undefined) {
@@ -113,6 +115,20 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
     }
 
     return `scale=-2:${maxHeight}`;
+  }
+
+  private extractFfmpegError(stderr: string): string {
+    const lines = stderr
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    const errorLines = lines.filter((line) =>
+      /error|invalid|unable|failed|not found|denied|conversion failed/i.test(line),
+    );
+
+    const selected = errorLines.length > 0 ? errorLines.slice(-5) : lines.slice(-8);
+    return selected.join(" | ").slice(0, 500);
   }
 
   private async consumeProgress(
