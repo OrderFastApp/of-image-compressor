@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
 import { AspectRatio } from "@/modules/image-compression/domain/value-objects/AspectRatio";
+import { describe, expect, test } from "vitest";
 
 describe("AspectRatio", () => {
   describe("parse", () => {
