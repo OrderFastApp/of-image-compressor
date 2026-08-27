@@ -58,7 +58,11 @@ export function createApp() {
   const videoTempStorage = new BunTempFileStorage(envConfig.VIDEO_TEMP_DIR);
   const videoDownloadStore = new InMemoryCompressedVideoDownloadStore(videoTempStorage);
   const videoMetadataReader = new FfprobeVideoMetadataReader(envConfig.FFPROBE_PATH);
-  const videoCompressor = new FfmpegVideoCompressor(envConfig.FFMPEG_PATH, videoTempStorage);
+  const videoCompressor = new FfmpegVideoCompressor(
+    envConfig.FFMPEG_PATH,
+    videoTempStorage,
+    envConfig.FFMPEG_THREADS,
+  );
   const videoValidationService = new VideoValidationService();
   const compressVideoUseCase = new CompressVideoUseCase(
     videoCompressor,

@@ -6,7 +6,11 @@ import { logger } from "./shared/logger/logger";
 await (async () => {
   if (process.env.NODE_ENV === "production") {
     if (cluster.isPrimary) {
-      const workers = os.availableParallelism();
+      const configuredWorkers = Number.parseInt(process.env.WORKERS ?? "", 10);
+      const workers =
+        Number.isInteger(configuredWorkers) && configuredWorkers > 0
+          ? configuredWorkers
+          : os.availableParallelism();
 
       logger.info("Cluster primary started", { workers });
 

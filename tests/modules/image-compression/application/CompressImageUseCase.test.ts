@@ -22,6 +22,7 @@ const envConfig: EnvConfig = {
   DEFAULT_VIDEO_OUTPUT_FORMAT: "mp4",
   FFMPEG_PATH: "ffmpeg",
   FFPROBE_PATH: "ffprobe",
+  FFMPEG_THREADS: 2,
   VIDEO_TEMP_DIR: "/tmp/of-video-compressor",
   VIDEO_DOWNLOAD_TTL_SECONDS: 300,
   LOG_LEVEL: "debug",

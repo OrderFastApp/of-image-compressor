@@ -11,6 +11,7 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
   constructor(
     private readonly ffmpegPath: string,
     private readonly tempStorage: TempFileStoragePort,
+    private readonly threads = 2,
   ) {}
 
   async compress(request: VideoCompressionRequest): Promise<VideoCompressionResponse> {
@@ -35,8 +36,12 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
     const [exitCode, stderr] = await Promise.all([proc.exited, stderrPromise, progressPromise]);
 
     if (exitCode !== 0) {
+      const oomHint =
+        exitCode === 137
+          ? " (process killed; likely out of memory — raise container memory limit or lower WORKERS/FFMPEG_THREADS)"
+          : "";
       throw new VideoCompressionFailedError(
-        `ffmpeg failed (exit ${exitCode})${stderr ? `: ${this.extractFfmpegError(stderr)}` : ""}`,
+        `ffmpeg failed (exit ${exitCode})${oomHint}${stderr ? `: ${this.extractFfmpegError(stderr)}` : ""}`,
       );
     }
 
@@ -53,7 +58,16 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
 
   private buildArgs(request: VideoCompressionRequest): string[] {
     const { inputPath, outputPath, options } = request;
-    const args = ["-y", "-i", inputPath, "-progress", "pipe:1", "-nostats"];
+    const args = [
+      "-y",
+      "-threads",
+      String(this.threads),
+      "-i",
+      inputPath,
+      "-progress",
+      "pipe:1",
+      "-nostats",
+    ];
 
     const scaleFilter = this.buildScaleFilter(options.maxWidth, options.maxHeight);
     if (scaleFilter) {
@@ -75,6 +89,10 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
         String(crf),
         "-b:v",
         "0",
+        "-row-mt",
+        "1",
+        "-threads",
+        String(this.threads),
         "-c:a",
         "libopus",
         "-b:a",
@@ -86,9 +104,11 @@ export class FfmpegVideoCompressor implements VideoCompressorPort {
       "-c:v",
       "libx264",
       "-preset",
-      "medium",
+      "veryfast",
       "-crf",
       String(crf),
+      "-threads",
+      String(this.threads),
       "-c:a",
       "aac",
       "-b:a",

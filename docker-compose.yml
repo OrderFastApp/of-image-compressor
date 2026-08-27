@@ -11,21 +11,37 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
+      WORKERS: ${WORKERS:-2}
       MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-20}
       MAX_IMAGE_WIDTH: ${MAX_IMAGE_WIDTH:-10000}
       MAX_IMAGE_HEIGHT: ${MAX_IMAGE_HEIGHT:-10000}
       DEFAULT_QUALITY: ${DEFAULT_QUALITY:-80}
       DEFAULT_OUTPUT_FORMAT: ${DEFAULT_OUTPUT_FORMAT:-webp}
+      MAX_VIDEO_UPLOAD_SIZE_MB: ${MAX_VIDEO_UPLOAD_SIZE_MB:-200}
+      MAX_VIDEO_DURATION_SECONDS: ${MAX_VIDEO_DURATION_SECONDS:-600}
+      DEFAULT_VIDEO_CRF: ${DEFAULT_VIDEO_CRF:-28}
+      DEFAULT_VIDEO_OUTPUT_FORMAT: ${DEFAULT_VIDEO_OUTPUT_FORMAT:-mp4}
+      FFMPEG_PATH: ${FFMPEG_PATH:-ffmpeg}
+      FFPROBE_PATH: ${FFPROBE_PATH:-ffprobe}
+      FFMPEG_THREADS: ${FFMPEG_THREADS:-2}
+      VIDEO_TEMP_DIR: /data/video-temp
+      VIDEO_DOWNLOAD_TTL_SECONDS: ${VIDEO_DOWNLOAD_TTL_SECONDS:-300}
       CORS_ENABLED: ${CORS_ENABLED:-true}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
       CORS_CREDENTIALS: ${CORS_CREDENTIALS:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     restart: unless-stopped
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:size=64m
+    volumes:
+      - video-temp:/data/video-temp
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 2G
         reservations:
-          memory: 128M
+          memory: 512M
+
+volumes:
+  video-temp:
