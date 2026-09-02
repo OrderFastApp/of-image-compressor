@@ -24,7 +24,7 @@ const envConfig: EnvConfig = {
   FFPROBE_PATH: "ffprobe",
   FFMPEG_THREADS: 2,
   VIDEO_TEMP_DIR: "/tmp/of-video-compressor",
-  VIDEO_DOWNLOAD_TTL_SECONDS: 300,
+  VIDEO_DOWNLOAD_TTL_SECONDS: 1800,
   LOG_LEVEL: "debug",
   CORS_ENABLED: true,
   CORS_ORIGIN: "*",

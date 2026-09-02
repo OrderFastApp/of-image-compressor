@@ -49,7 +49,7 @@ const envSchema = z.object({
   FFPROBE_PATH: z.string().min(1).default("ffprobe"),
   FFMPEG_THREADS: z.coerce.number().int().positive().default(2),
   VIDEO_TEMP_DIR: z.string().min(1).default(defaultVideoTempDir),
-  VIDEO_DOWNLOAD_TTL_SECONDS: z.coerce.number().int().positive().default(300),
+  VIDEO_DOWNLOAD_TTL_SECONDS: z.coerce.number().int().positive().default(1800),
   WORKERS: z.coerce.number().int().positive().optional(),
   LOG_LEVEL: logLevelSchema.default("debug"),
   CORS_ENABLED: booleanFromEnv(true),

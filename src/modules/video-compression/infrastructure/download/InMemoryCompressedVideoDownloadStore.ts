@@ -42,15 +42,14 @@ export class InMemoryCompressedVideoDownloadStore implements CompressedVideoDown
     return stored;
   }
 
-  async take(id: string): Promise<StoredCompressedVideo | null> {
+  async get(id: string): Promise<StoredCompressedVideo | null> {
     const stored = this.entries.get(id);
     if (!stored) {
       return null;
     }
 
-    this.entries.delete(id);
-
     if (stored.expiresAt.getTime() <= Date.now()) {
+      this.entries.delete(id);
       await this.tempStorage.delete(stored.filePath).catch(() => undefined);
       return null;
     }

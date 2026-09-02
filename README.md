@@ -81,7 +81,7 @@ data: {"code":"...","message":"..."}
 
 ### `GET /api/v1/videos/download/:id`
 
-Descarga el video comprimido (binario). El archivo se elimina tras la descarga o al expirar el TTL.
+Descarga el video comprimido (binario). El link se puede usar varias veces hasta que expire el TTL (`VIDEO_DOWNLOAD_TTL_SECONDS`, default 30 min).
 
 Headers de métricas: `X-Original-Size`, `X-Compressed-Size`, `X-Compression-Ratio`, `X-Output-Format`.
 
@@ -120,7 +120,7 @@ curl -L "http://localhost:3000/api/v1/videos/download/<id>" -o optimized.mp4 -D 
 | `FFMPEG_PATH` | ffmpeg | Binario de ffmpeg |
 | `FFPROBE_PATH` | ffprobe | Binario de ffprobe |
 | `VIDEO_TEMP_DIR` | `{tmpdir}/of-video-compressor` | Directorio de archivos temporales |
-| `VIDEO_DOWNLOAD_TTL_SECONDS` | 300 | TTL de la URL de descarga |
+| `VIDEO_DOWNLOAD_TTL_SECONDS` | 1800 | TTL de la URL de descarga (30 min; reutilizable hasta expirar) |
 | `CORS_ENABLED` | true | Habilita CORS |
 | `CORS_ORIGIN` | `*` | Orígenes permitidos (`*` o lista separada por comas) |
 | `CORS_CREDENTIALS` | false | Permite cookies/credentials |

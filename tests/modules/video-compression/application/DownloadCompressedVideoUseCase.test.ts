@@ -10,7 +10,7 @@ function createUseCase(overrides?: {
 }) {
   const downloadStore: CompressedVideoDownloadStorePort = {
     save: vi.fn(),
-    take: vi.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       id: "id-1",
       filePath: "/tmp/out.mp4",
       filename: "optimized-clip.mp4",
@@ -41,21 +41,22 @@ function createUseCase(overrides?: {
 }
 
 describe("DownloadCompressedVideoUseCase", () => {
-  it("devuelve el video y limpia el temp file", async () => {
-    const { useCase, tempStorage } = createUseCase();
+  it("devuelve el video sin borrar el archivo (reutilizable hasta TTL)", async () => {
+    const { useCase, tempStorage, downloadStore } = createUseCase();
 
     const result = await useCase.execute("id-1");
 
     expect(result.filename).toBe("optimized-clip.mp4");
     expect(result.fileBuffer).toEqual(new Uint8Array([1, 2, 3, 4]));
     expect(result.compressedSize).toBe(40);
-    expect(tempStorage.delete).toHaveBeenCalledWith("/tmp/out.mp4");
+    expect(downloadStore.get).toHaveBeenCalledWith("id-1");
+    expect(tempStorage.delete).not.toHaveBeenCalled();
   });
 
   it("falla si el id no existe", async () => {
     const { useCase } = createUseCase({
       downloadStore: {
-        take: vi.fn().mockResolvedValue(null),
+        get: vi.fn().mockResolvedValue(null),
       },
     });
 

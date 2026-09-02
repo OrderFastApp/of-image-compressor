@@ -19,31 +19,28 @@ export class DownloadCompressedVideoUseCase {
   async execute(id: string, context?: ExecuteContext): Promise<DownloadCompressedVideoOutput> {
     const log = context?.requestLogger ?? logger;
 
-    const stored = await this.downloadStore.take(id);
+    const stored = await this.downloadStore.get(id);
     if (!stored) {
       throw new VideoDownloadNotFoundError();
     }
 
-    try {
-      const fileBuffer = await this.tempStorage.read(stored.filePath);
+    const fileBuffer = await this.tempStorage.read(stored.filePath);
 
-      log.debug("Compressed video download ready", {
-        downloadId: id,
-        filename: stored.filename,
-        compressedSize: stored.compressedSize,
-      });
+    log.debug("Compressed video download ready", {
+      downloadId: id,
+      filename: stored.filename,
+      compressedSize: stored.compressedSize,
+      expiresAt: stored.expiresAt.toISOString(),
+    });
 
-      return {
-        fileBuffer,
-        filename: stored.filename,
-        mimeType: stored.mimeType,
-        outputFormat: stored.outputFormat,
-        originalSize: stored.originalSize,
-        compressedSize: stored.compressedSize,
-        compressionRatio: stored.compressionRatio,
-      };
-    } finally {
-      await this.tempStorage.delete(stored.filePath).catch(() => undefined);
-    }
+    return {
+      fileBuffer,
+      filename: stored.filename,
+      mimeType: stored.mimeType,
+      outputFormat: stored.outputFormat,
+      originalSize: stored.originalSize,
+      compressedSize: stored.compressedSize,
+      compressionRatio: stored.compressionRatio,
+    };
   }
 }

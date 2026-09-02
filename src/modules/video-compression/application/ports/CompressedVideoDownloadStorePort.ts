@@ -25,5 +25,5 @@ export type SaveCompressedVideoInput = {
 
 export interface CompressedVideoDownloadStorePort {
   save(input: SaveCompressedVideoInput): Promise<StoredCompressedVideo>;
-  take(id: string): Promise<StoredCompressedVideo | null>;
+  get(id: string): Promise<StoredCompressedVideo | null>;
 }

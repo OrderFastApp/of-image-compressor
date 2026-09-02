@@ -140,7 +140,7 @@ export const compressVideoOpenApiDetail = {
 export const downloadCompressedVideoOpenApiDetail = {
   summary: "Download a compressed video",
   description:
-    "Downloads a previously compressed video by temporary id. The file is deleted after a successful download or when the TTL expires.",
+    "Downloads a previously compressed video by temporary id. The link remains valid until the TTL expires and can be downloaded multiple times.",
   tags: ["Videos"],
   parameters: [
     {
